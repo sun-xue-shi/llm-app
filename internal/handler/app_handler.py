@@ -1,3 +1,5 @@
+import os
+
 from flask import request
 from openai import OpenAI
 
@@ -7,7 +9,8 @@ class AppHandler:
         """基础聊天api"""
         query = request.json.get("query")
 
-        client = OpenAI(api_key="sk-e42c1d967b4b42b5a2f62b5fa6ba011b", base_url="https://api.deepseek.com")
+        """这里会自动读取环境变量的api-key"""
+        client = OpenAI(base_url=os.getenv("DEEPSEEK_BASE_URL"))
 
         response = client.chat.completions.create(
             model="deepseek-chat",
