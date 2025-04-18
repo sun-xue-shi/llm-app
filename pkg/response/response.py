@@ -25,7 +25,7 @@ def fail_json(data: Any = None):
     return json(Response(code=HttpCode.FAIL, message="", data=data))
 
 
-def valid_json(errors: dict = None):
+def valid_error_json(errors: dict = None):
     first_key = next(iter(errors))
     if first_key is not None:
         msg = errors.get(first_key)[0]

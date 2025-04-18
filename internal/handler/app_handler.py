@@ -1,33 +1,32 @@
-import os
+from dataclasses import dataclass
 
-from flask import request
-from openai import OpenAI
+from injector import inject
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
 
 from internal.schema.app_schema import CompletionReq
-from pkg.response import success_json, valid_json
+from pkg.response import success_json, valid_error_json
 
 
+@inject
+@dataclass
 class AppHandler:
     def completion(self):
         """基础聊天api"""
 
         req = CompletionReq()
         if not req.validate():
-            return valid_json(req.errors)
-        query = request.json.get("query")
+            return valid_error_json(req.errors)
 
-        """这里会自动读取环境变量的api-key"""
-        client = OpenAI(base_url=os.getenv("DEEPSEEK_BASE_URL"))
+        print("query: ", req.query.data)
 
-        chat = client.chat.completions.create(
-            model="deepseek-chat",
-            messages=[
-                {"role": "system", "content": "你是一个聊天机器人，请根据用户回复输入信息"},
-                {"role": "user", "content": query},
-            ],
-            stream=False
-        )
+        prompt = ChatPromptTemplate.from_template("{query}")
+        llm = ChatOpenAI(model="deepseek-chat")
+        parser = StrOutputParser()
 
-        content = chat.choices[0].message.content
+        chain = prompt | llm | parser
+
+        content = chain.invoke({"query": req.query.data})
 
         return success_json({"content": content})
