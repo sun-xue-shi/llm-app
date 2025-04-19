@@ -17,6 +17,7 @@ class Router:
 
         """url与控制器绑定"""
         bp.add_url_rule("/app/chat", methods=["POST"], view_func=self.app_handler.completion)
+        bp.add_url_rule("/app", methods=["POST"], view_func=self.app_handler.create_app)
 
         """在应用上注册蓝图"""
         app.register_blueprint(bp)
