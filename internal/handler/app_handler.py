@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import dataclass
 
 from injector import inject
@@ -19,6 +20,21 @@ class AppHandler:
         """创建应用"""
         app = self.app_service.create_app()
         return success_message(f"创建应用成功, app_id: {app.id}")
+
+    def get_app(self, id: uuid.uuid4()):
+        """获取应用"""
+        app = self.app_service.get_app(id)
+        return success_message(f"获取应用成功, app_name: {app.name}")
+
+    def del_app(self, id: uuid.uuid4()):
+        """删除应用"""
+        app = self.app_service.del_app(id)
+        return success_message(f"删除应用成功, app_name: {app.name}")
+
+    def update_app(self, id: uuid.uuid4()):
+        """更新应用"""
+        app = self.app_service.update_app(id)
+        return success_message(f"更新应用成功, app_name: {app.name}")
 
     def completion(self):
         """基础聊天api"""

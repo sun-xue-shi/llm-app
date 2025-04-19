@@ -18,3 +18,18 @@ class AppService:
         self.db.session.add(app)
         self.db.session.commit()
         return app
+
+    def get_app(self, id: uuid.uuid4()) -> App:
+        return self.db.session.query(App).get(id)
+
+    def del_app(self, id: uuid.uuid4()) -> App:
+        app = self.get_app(id)
+        self.db.session.delete(app)
+        self.db.session.commit()
+        return app
+
+    def update_app(self, id: uuid.uuid4()) -> App:
+        app = self.get_app(id)
+        app.name = "test_update"
+        self.db.session.commit()
+        return app
