@@ -1,9 +1,13 @@
 import uuid
 from dataclasses import dataclass
+from operator import itemgetter
 
 from injector import inject
+from langchain.memory import ConversationBufferWindowMemory
+from langchain_community.chat_message_histories import FileChatMessageHistory
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_openai import ChatOpenAI
 
 from internal.schema.app_schema import CompletionReq
@@ -43,14 +47,28 @@ class AppHandler:
         if not req.validate():
             return valid_error_json(req.errors)
 
-        print("query: ", req.query.data)
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", "你是一个智能助手，请根据用户的问题给出回答"),
+            MessagesPlaceholder("history"),
+            ("human", "{query}"),
+        ])
 
-        prompt = ChatPromptTemplate.from_template("{query}")
+        memory = ConversationBufferWindowMemory(
+            k=3,
+            input_key="query",
+            output_key="output",
+            return_messages=True,
+            chat_memory=FileChatMessageHistory(".\storage\memory\chat_history.txt")
+        )
+
         llm = ChatOpenAI(model="deepseek-chat")
-        parser = StrOutputParser()
 
-        chain = prompt | llm | parser
+        chain = RunnablePassthrough.assign(
+            history=RunnableLambda(memory.load_memory_variables) | itemgetter("history")
+        ) | prompt | llm | StrOutputParser()
 
         content = chain.invoke({"query": req.query.data})
+
+        memory.save_context({"query": req.query.data}, {"output": content})
 
         return success_json({"content": content})
