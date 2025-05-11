@@ -13,6 +13,7 @@ from langchain_core.runnables import RunnablePassthrough, RunnableLambda, Runnab
 from langchain_core.tracers import Run
 from langchain_openai import ChatOpenAI
 
+from internal.core.tools.builtin_tools.providers import BuiltinProviderManager
 from internal.schema.app_schema import CompletionReq
 from internal.service import AppService, VectorDatabaseService
 from pkg.response import success_json, valid_error_json, success_message
@@ -23,6 +24,7 @@ from pkg.response import success_json, valid_error_json, success_message
 class AppHandler:
     app_service: AppService
     vector_database_service: VectorDatabaseService
+    provider_manager: BuiltinProviderManager
 
     def create_app(self):
         """创建应用"""
