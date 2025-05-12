@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from flask import Flask, Blueprint
 from injector import inject
 
+from internal.handler import BuiltinToolHandler
 from internal.handler.app_handler import AppHandler
 
 
@@ -10,6 +11,7 @@ from internal.handler.app_handler import AppHandler
 @dataclass
 class Router:
     app_handler: AppHandler
+    builtin_tool_handler: BuiltinToolHandler
 
     def register_router(self, app: Flask):
         """创建一个蓝图"""
@@ -21,6 +23,11 @@ class Router:
         bp.add_url_rule("/app/<id>", methods=["GET"], view_func=self.app_handler.get_app)
         bp.add_url_rule("/app/<id>", methods=["DELETE"], view_func=self.app_handler.del_app)
         bp.add_url_rule("/app/<id>", methods=["POST"], view_func=self.app_handler.update_app)
+
+        # 内置插件工具模块
+        bp.add_url_rule("/builtin_tools", methods=["GET"], view_func=self.builtin_tool_handler.get_builtin_tools)
+        bp.add_url_rule("/builtin_tools/<provider_name>/tools/<tool_name>", methods=["GET"],
+                        view_func=self.builtin_tool_handler.get_builtin_tool)
 
         """在应用上注册蓝图"""
         app.register_blueprint(bp)

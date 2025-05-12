@@ -3,12 +3,15 @@ from langchain_community.utilities import GoogleSerperAPIWrapper
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.tools import BaseTool
 
+from internal.lib import add_attribute
+
 
 class GoogleSerperArgsSchema(BaseModel):
     """谷歌SerperAPI搜索参数描述"""
     query: str = Field(description="需要检索查询的语句.")
 
 
+@add_attribute("args_schema", GoogleSerperArgsSchema)
 def google_serper(**kwargs) -> BaseTool:
     """谷歌Serp搜索"""
     return GoogleSerperRun(
