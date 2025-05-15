@@ -1,4 +1,5 @@
+from .api_tool import ApiToolHandler
 from .app_handler import AppHandler
-from .builtin_tool_handler import BuiltinToolHandler
+from .builtin_tool import BuiltinToolHandler
 
-__all__ = ["AppHandler", "BuiltinToolHandler"]
+__all__ = ["AppHandler", "BuiltinToolHandler", "ApiToolHandler"]
