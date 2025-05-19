@@ -7,6 +7,7 @@ from injector import inject
 from sqlalchemy import desc
 
 from internal.core.tools.api_tools.entities import OpenAPISchema
+from internal.core.tools.api_tools.provider import ApiProviderManager
 from internal.exception import ValidateException, NotFoundException
 from internal.model import ApiToolProvider, ApiTool
 from internal.schema.api_tool import CreateApiTool, GetApiToolProvidersWithPageReq, UpdateApiToolProviderReq
@@ -19,6 +20,7 @@ from pkg.sqlalchemy import SQLAlchemy
 @dataclass
 class ApiToolService(BaseService):
     db: SQLAlchemy
+    api_provider_manager: ApiProviderManager
 
     @classmethod
     def parse_openapi_schema(cls, schema: str):
@@ -187,3 +189,25 @@ class ApiToolService(BaseService):
                     method=method,
                     parameters=method_item.get("parameters", []),
                 )
+
+    def api_tool_invoke(self):
+        provider_id = "d72bb9d7-8794-4caf-bd60-1f992c537065"
+        tool_name = "YoudaoSuggest"
+
+        api_tool = self.db.session.query(ApiTool).filter(
+            ApiTool.provider_id == provider_id,
+            ApiTool.name == tool_name,
+        ).one_or_none()
+        api_tool_provider = api_tool.provider
+
+        from internal.core.tools.api_tools.entities import ToolEntity
+        tool = self.api_provider_manager.get_tool(ToolEntity(
+            id=provider_id,
+            name=tool_name,
+            url=api_tool.url,
+            method=api_tool.method,
+            description=api_tool.description,
+            headers=api_tool_provider.headers,
+            parameters=api_tool.parameters,
+        ))
+        return tool.invoke({"q": "love", "doctype": "json"})

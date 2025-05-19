@@ -52,6 +52,8 @@ class Router:
             methods=["POST"],
             view_func=self.api_tool_handler.delete_api_tool_provider,
         )
+        bp.add_url_rule("/api_tools/<uuid:provider_id>", methods=["POST"],
+                        view_func=self.api_tool_handler.update_api_tool_provider)
         bp.add_url_rule("/api_tools", methods=["GET"], view_func=self.api_tool_handler.get_api_tool_providers_with_page)
 
         """在应用上注册蓝图"""
